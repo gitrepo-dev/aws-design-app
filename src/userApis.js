@@ -1,7 +1,9 @@
 const db = require("./dynamodb")
 const sls = require('serverless-http');
 const express = require('express')
+const cors = require('cors');
 const app = express()
+app.use(cors());
 const {
     GetItemCommand,
     PutItemCommand,
