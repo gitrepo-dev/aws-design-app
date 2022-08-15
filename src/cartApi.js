@@ -7,7 +7,9 @@ const {
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const serverless = require('serverless-http');
 const express = require('express')
+const cors = require('cors');
 const app = express()
+app.use(cors());
 
 
 
