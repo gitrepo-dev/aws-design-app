@@ -91,7 +91,7 @@ functions:
 # product api schema
   getAllProducts:
       handler: src/productApis.handler     
-      name: get-products # lambda function name
+      name: get-all-products # lambda function name
       description: this function for getting the all Products from dynamodb table
       timeout: 10 #sec to execute otherwise fail
       memorySize: 128 #it will take max size
