@@ -104,7 +104,7 @@ functions:
 
   createProduct:
     handler: src/productApis.handler     
-    name: create-product # lambda function name
+    name: purchase-product # lambda function name
     description: this function create product into dynamodb table
     timeout: 10 #sec to execute otherwise fail
     memorySize: 128 #it will take max size
@@ -145,7 +145,7 @@ functions:
 # cart api schema
   addToCart:
     handler: src/cartApi.handler    
-    name: login-user # lambda function name
+    name: add-to-cart # lambda function name
     description: this function for add to cart
     timeout: 10 #sec to execute otherwise fail
     memorySize: 128 #it will take max size
@@ -171,7 +171,7 @@ functions:
 
   removeFromCart:
     handler: src/cartApi.handler    
-    name: login-user # lambda function name
+    name: remove-item-from-cart # lambda function name
     description: this function for remove product from cart
     timeout: 10 #sec to execute otherwise fail
     memorySize: 128 #it will take max size
@@ -187,7 +187,7 @@ functions:
 # user api schema
   registrationUser:
       handler: src/userApis.handler     
-      name: create-user # lambda function name
+      name: registration-user # lambda function name
       description: this function for added new user in dynamodb table
       timeout: 10 #sec to execute otherwise fail
       memorySize: 128 #it will take max size
