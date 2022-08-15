@@ -12,7 +12,7 @@ const express = require('express')
 const app = express()
 
 
-// create single product
+// add single product
 app.post('/product/purchase', async (req, res) => {
   try {
     const obj = JSON.parse(req.body)
