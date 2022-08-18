@@ -95,11 +95,6 @@ app.post('/user/login', async (req, res) => {
             });
         }
         else {
-            // const params = {
-            //     TableName: process.env.USER_TABLE_NAME, // table name from the serverless file
-            //     Item: marshall(obj || {}) // conver it in dynamo formate
-            // }
-            // await db.send(new PutItemCommand(params))
             const userData = unmarshall(Item)
             delete userData['password']
             res.status(200).json({
@@ -107,8 +102,17 @@ app.post('/user/login', async (req, res) => {
                 success: true,
                 data: {
                     user_agent: {
-                        ...userData,
-                        auth: true
+                        name: userData.name,
+                        uuid: userData.uuid,
+                        token: userData.token,
+                        email: userData.email,
+                        auth: true,
+                        billingDetails: {
+                            cvc: userData.cvc,
+                            address: userData.address,
+                            card_number: userData.card_number,
+                            phone: userData.phone
+                        }
                     },
                 }
             });
@@ -126,11 +130,12 @@ app.post('/user/login', async (req, res) => {
 
 
 // add user billing address
-app.put('/user/billing/details/:email', async (req, res) => {
+app.put('/user/billing/details', async (req, res) => {
+    const body = JSON.parse(req.body);
     try {
         const isUserExsist = {
             TableName: process.env.USER_TABLE_NAME,
-            Key: marshall({ email: req.params.email }),
+            Key: marshall({ email: body.email }),
         };
         const { Item } = await db.send(new GetItemCommand(isUserExsist));
         if (Item === undefined) {
@@ -139,11 +144,10 @@ app.put('/user/billing/details/:email', async (req, res) => {
                 success: false
             });
         } else if (Item && Item.email.S) {
-            const body = JSON.parse(req.body);
-            const objKeys = Object.keys(body);
+            const objKeys = Object.keys(body.billingDetails);
             const params = {
                 TableName: process.env.USER_TABLE_NAME,
-                Key: marshall({ email: req.params.email }),
+                Key: marshall({ email: body.email }),
                 UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
                 ExpressionAttributeNames: objKeys.reduce((acc, key, index) => ({
                     ...acc,
@@ -151,18 +155,20 @@ app.put('/user/billing/details/:email', async (req, res) => {
                 }), {}),
                 ExpressionAttributeValues: marshall(objKeys.reduce((acc, key, index) => ({
                     ...acc,
-                    [`:value${index}`]: body[key],
+                    [`:value${index}`]: body.billingDetails[key],
                 }), {})),
             };
-            await db.send(new UpdateItemCommand(params));
-            res.status(202).json({
-                message: 'Successfully added billing details.',
-                success: true,
-                data: {
-                    ...unmarshall(Item),
-                    ...body
-                }
-            });
+            const isSuccess = await db.send(new UpdateItemCommand(params));
+            if (isSuccess.$metadata.httpStatusCode === 200) {
+                res.status(202).json({
+                    message: 'Successfully added billing details.',
+                    success: true,
+                    data: {
+                        ...unmarshall(Item),
+                        ...body
+                    }
+                })
+            };
         }
     } catch (e) {
         res.status(500).json({

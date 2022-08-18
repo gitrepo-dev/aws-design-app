@@ -83,6 +83,7 @@ resources: # actual config for table
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
+# commit when deploy on aws
 # plugins:
 #   - serverless-dynamodb-local
 #   - serverless-offline
@@ -99,7 +100,7 @@ functions:
         - http: # endpoint and params for api gatway
             path: purchased/history
             method: get
-            private: false
+            private: true
             cors: true
 
   createProduct:
@@ -112,7 +113,7 @@ functions:
       - http: # endpoint and params for api gatway
           path: /product/purchase
           method: post
-          private: false
+          private: true
           cors: true
 
   deleteProduct:
@@ -125,7 +126,7 @@ functions:
       - http: # endpoint and params for api gatway
           path: delete/history
           method: delete
-          private: false
+          private: true
           cors: true
 
   updateProduct:
@@ -153,7 +154,7 @@ functions:
       - http: # endpoint and params for api gatway
           path: cart/add
           method: post
-          private: false
+          private: true
           cors: true
 
   getAllCartProducts:
@@ -166,7 +167,7 @@ functions:
         - http: # endpoint and params for api gatway
             path: cart/products
             method: get
-            private: false
+            private: true
             cors: true
 
   removeFromCart:
@@ -179,7 +180,7 @@ functions:
       - http: # endpoint and params for api gatway
           path: cart/remove/{uuid}
           method: delete
-          private: false
+          private: true
           cors: true
 
 
@@ -219,7 +220,7 @@ functions:
     memorySize: 128 #it will take max size
     events:
       - http: # endpoint and params for api gatway
-          path: /user/billing/details/{email}
+          path: /user/billing/details
           method: put
           private: true
           cors: true
