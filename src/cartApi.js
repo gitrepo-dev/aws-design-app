@@ -48,6 +48,7 @@ app.post('/cart/add', async (req, res) => {
 app.get('/cart/products', async (req, res) => {
   try {
     const { Items } = await db.send(new ScanCommand({ TableName: process.env.CART_TABLE_NAME })); // send params to dynamo client to get data
+
     if(Items && Items.length > 0) {
       res.status(200).json({
         data: Items.map((item) => unmarshall(item)),

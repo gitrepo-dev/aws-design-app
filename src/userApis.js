@@ -160,11 +160,14 @@ app.put('/user/billing/details', async (req, res) => {
             };
             const isSuccess = await db.send(new UpdateItemCommand(params));
             if (isSuccess.$metadata.httpStatusCode === 200) {
+                const userData = unmarshall(Item)
+                delete userData['password']
                 res.status(202).json({
                     message: 'Successfully added billing details.',
                     success: true,
                     data: {
-                        ...unmarshall(Item),
+                        auth: true,
+                        ...userData,
                         ...body
                     }
                 })

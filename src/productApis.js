@@ -17,27 +17,33 @@ app.use(cors());
 app.post('/product/purchase', async (req, res) => {
   try {
     const obj = JSON.parse(req.body)
+
     if (!obj.billingDetails.card_number) {
       res.status(200).json({
         message: 'Please add billing details.',
         success: false
       });
     } else {
-      let cartObj, params
+      let params;
       if (obj?.product?.length > 0) {
-        obj.product.forEach((eachItem) => {
+        obj.product.forEach(async (eachItem) => {
+
           params = {
             TableName: process.env.PRODUCT_TABLE_NAME, // table name from the serverless file
             Item: marshall(eachItem || {}) // conver it in dynamo formate
           }
-          // find and delete product from cart table if it exists
-          cartObj = {
+
+          const { Item } = await db.send(new GetItemCommand({
             TableName: process.env.CART_TABLE_NAME,
             Key: marshall({ uuid: eachItem.uuid }),
-          };
-          const Item = db.send(new GetItemCommand(cartObj))
-          if (Item) { db.send(new DeleteItemCommand(cartObj)) };
-          db.send(new PutItemCommand(params))
+          }))
+          if (Item && Item?.uuid?.S) {
+            await db.send(new DeleteItemCommand({
+              TableName: process.env.CART_TABLE_NAME,
+              Key: marshall({ uuid: eachItem.uuid })
+            }))
+          }
+          await db.send(new PutItemCommand(params))
         })
       } else {
         params = {
