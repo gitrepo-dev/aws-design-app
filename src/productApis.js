@@ -37,25 +37,35 @@ app.post('/product/purchase', async (req, res) => {
             TableName: process.env.CART_TABLE_NAME,
             Key: marshall({ uuid: eachItem.uuid }),
           }))
+          let response;
           if (Item && Item?.uuid?.S) {
-            await db.send(new DeleteItemCommand({
+            response = await db.send(new DeleteItemCommand({
               TableName: process.env.CART_TABLE_NAME,
               Key: marshall({ uuid: eachItem.uuid })
             }))
           }
-          await db.send(new PutItemCommand(params))
+          if (response?.$metadata?.httpStatusCode) {
+            await db.send(new PutItemCommand(params))
+          }
         })
+        const { Items } = await db.send(new ScanCommand({ TableName: process.env.CART_TABLE_NAME }));
+        if (Items) {
+          res.status(200).json({
+            message: 'Successfully purchased.',
+            success: true
+          });
+        }
       } else {
         params = {
           TableName: process.env.PRODUCT_TABLE_NAME, // table name from the serverless file
           Item: marshall(obj.product || {}) // conver it in dynamo formate
         }
         await db.send(new PutItemCommand(params))
+        res.status(200).json({
+          message: 'Successfully purchased.',
+          success: true
+        });
       }
-      res.status(200).json({
-        message: 'Successfully purchased.',
-        success: true
-      });
     }
   } catch (e) {
     res.status(500).json({
@@ -80,7 +90,7 @@ app.get('/purchased/history', async (req, res) => {
     } else {
       res.status(200).json({
         data: [],
-        message: 'Not found history.',
+        message: 'Not purchase history found.',
         success: false
       });
     }
